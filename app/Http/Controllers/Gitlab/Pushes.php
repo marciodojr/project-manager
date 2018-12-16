@@ -16,9 +16,20 @@ class Pushes extends Controller
     }
 
     /**
+     * Load the last $pageSize push entries from database.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $pageSize = 20;
+        $pushes = $this->push->orderBy('id', 'desc')->limit($pageSize)->get();
+        return response($pushes, 200);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)

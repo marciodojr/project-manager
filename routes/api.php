@@ -17,4 +17,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('gitlab/pushes', 'Gitlab\Pushes@store');
+Route::prefix('gitlab')->group(function() {
+    Route::get('pushes', 'Gitlab\Pushes@index');
+    Route::post('pushes', 'Gitlab\Pushes@store');
+});
