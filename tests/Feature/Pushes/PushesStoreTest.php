@@ -19,7 +19,7 @@ class PushesStoreTest extends TestCase
     {
         $push = factory(Push::class)->make();
         $response = $this->post('/api/gitlab/pushes', [
-            'repository' => [
+            'project' => [
                 'name' => $push->repository_name
             ],
             'user_username' => $push->pusher,
