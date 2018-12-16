@@ -1,0 +1,62 @@
+# v2 syntax
+version: '2'
+
+# Named volumes
+volumes:
+  # MySQL Data
+  project-manager-mysql-data:
+    driver: local
+
+  # Redis Data
+  project-manager-redis-data:
+    driver: local
+
+services:
+
+  # MySQL (5.7)
+  mysql:
+    image: mysql:5.7
+    container_name: project-manager-mysql
+    volumes:
+      - project-manager-mysql-data:/var/lib/mysql
+    ports:
+      - "13306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=pmanager
+      - MYSQL_DATABASE=pmanager
+      - MYSQL_USER=pmanager
+      - MYSQL_PASSWORD=pmanager
+
+  # Redis
+  cache:
+    image: redis:4.0
+    container_name: project-manager-redis
+    command: --appendonly yes
+    volumes:
+      - project-manager-redis-data:/data
+    ports:
+      - "16379:6379"
+
+  # PHP (with Nginx)
+  # you can change from nginx to apache, just change session 'image'
+  app:
+    image: ambientum/php:7.2-nginx
+    container_name: project-manager-app
+    volumes:
+      - .:/var/www/app
+    ports:
+      - "8080:8080"
+    links:
+      - mysql
+      - cache
+
+  # Laravel Queues
+  queue:
+    image: ambientum/php:7.2
+    container_name: project-manager-queue
+    command: php artisan queue:listen
+    volumes:
+      - .:/var/www/app
+    links:
+      - mysql
+      - cache
