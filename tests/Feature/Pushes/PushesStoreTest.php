@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Entity\Push;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PushesStoreTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * List pushes
      *
@@ -14,7 +17,7 @@ class PushesStoreTest extends TestCase
      */
     public function testStorePushesSuccess()
     {
-        $push = factory(Push::class)->create();
+        $push = factory(Push::class)->make();
         $response = $this->post('/api/gitlab/pushes', [
             'repository' => [
                 'name' => $push->repository_name
@@ -22,13 +25,12 @@ class PushesStoreTest extends TestCase
             'user_username' => $push->pusher,
             'total_commits_count' => $push->number_of_commits
         ]);
+
         $json = $response
             ->assertStatus(201)
             ->decodeResponseJson();
 
-        $this->assertEquals($push->repository_name, $json['repository_name']);
-        $this->assertEquals($push->pusher, $json['pusher']);
-        $this->assertEquals($push->number_of_commits, $json['number_of_commits']);
         $this->assertIsInt($json['id']);
+        $this->assertDatabaseHas('pushes', $json);
     }
 }
